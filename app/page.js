@@ -1,84 +1,38 @@
+// pages/Home.js
 "use client";
-import { useState, useEffect } from "react";
-import { firestore } from "@/firebase";
-import { Box, Modal, Typography, Stack, TextField, Button } from "@mui/material";
-import { getDocs, query, collection, getDoc, setDoc, doc, deleteDoc } from "firebase/firestore";
+import { Suspense, useState } from "react";
+import {
+  Box,
+  Modal,
+  Typography,
+  Stack,
+  TextField,
+  Button,
+} from "@mui/material";
+import useInventory from "@/hooks/useInventory";
+import Cards from "./components/cards";
+
+export const dynamic = "force-dynamic";
 
 export default function Home() {
-  const [inventory, setInventory] = useState([]);
+  const { inventory, loadingItems, addItem, removeItem } = useInventory();
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
-  const [loadingItems, setLoadingItems] = useState({});
-
-  const updateInventory = async () => {
-    const snapshot = query(collection(firestore, "inventory"));
-    const docs = await getDocs(snapshot);
-    const inventoryList = [];
-    docs.forEach((doc) => {
-      inventoryList.push({
-        name: doc.id,
-        ...doc.data(),
-      });
-    });
-    setInventory(inventoryList);
-  };
-
-  const setLoading = (item, value) => {
-    setLoadingItems((prevState) => ({
-      ...prevState,
-      [item]: value,
-    }));
-  };
-
-  const addItem = async (item) => {
-    if (!item) return; // Prevent adding empty item names
-    setLoading(item, true);
-
-    const docRef = doc(collection(firestore, "inventory"), item);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const { quantity } = docSnap.data();
-      await setDoc(docRef, { quantity: quantity + 1 });
-    } else {
-      await setDoc(docRef, { quantity: 1 });
-    }
-
-    await updateInventory();
-    setLoading(item, false);
-    handleClose(); // Close the modal after adding an item
-  };
-
-  const removeItem = async (item) => {
-    if (!item) return; // Prevent removing from empty item names
-    setLoading(item, true);
-
-    const docRef = doc(collection(firestore, "inventory"), item);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const { quantity } = docSnap.data();
-
-      if (quantity === 1) {
-        await deleteDoc(docRef);
-      } else {
-        await setDoc(docRef, { quantity: quantity - 1 });
-      }
-    }
-
-    await updateInventory();
-    setLoading(item, false);
-    handleClose(); // Close the modal after removing an item
-  };
-
-  useEffect(() => {
-    updateInventory();
-  }, []);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    setItemName(""); // Clear the input field when closing the modal
+    setItemName("");
+  };
+
+  const handleAddItem = async (item) => {
+    await addItem(item);
+    handleClose(); // Close the modal after adding an item
+  };
+
+  const handleRemoveItem = async (item) => {
+    await removeItem(item);
+    handleClose(); // Close the modal after removing an item
   };
 
   return (
@@ -119,7 +73,7 @@ export default function Home() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => addItem(itemName)}
+                onClick={() => handleAddItem(itemName)}
                 disabled={loadingItems[itemName]}
               >
                 Add
@@ -127,7 +81,7 @@ export default function Home() {
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => removeItem(itemName)}
+                onClick={() => handleRemoveItem(itemName)}
                 disabled={loadingItems[itemName]}
               >
                 Remove
@@ -153,44 +107,12 @@ export default function Home() {
           </Typography>
         </Box>
       </Box>
-      <Stack width="800px" height="300px" spacing={2} overflow="auto">
-        {inventory.map(({ name, quantity }) => (
-          <Box
-            key={name}
-            width="100%"
-            minHeight="150px"
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            bgcolor="#f0f0f0"
-            padding={2}
-          >
-            <Typography variant="h5" color="#333">
-              {name.charAt(0).toUpperCase() + name.slice(1)}
-            </Typography>
-            <Typography variant="h5" color="#333">
-              {quantity}
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="contained"
-                onClick={() => addItem(name)}
-                disabled={loadingItems[name]}
-              >
-                Add
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => removeItem(name)}
-                disabled={loadingItems[name]}
-              >
-                Remove
-              </Button>
-            </Stack>
-          </Box>
-        ))}
-      </Stack>
+      <Cards
+        inventory={inventory}
+        loadingItems={loadingItems}
+        addItem={addItem}
+        removeItem={removeItem}
+      />
     </Box>
   );
 }
