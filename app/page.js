@@ -1,6 +1,6 @@
 // pages/Home.js
 "use client";
-import { Suspense, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Modal,
@@ -8,16 +8,17 @@ import {
   Stack,
   TextField,
   Button,
+  IconButton,
 } from "@mui/material";
 import useInventory from "@/hooks/useInventory";
 import Cards from "./components/cards";
-
-export const dynamic = "force-dynamic";
+import { CameraEnhance as CameraEnhanceIcon } from "@mui/icons-material";
+import Link from "next/link";
 
 export default function Home() {
-  const { inventory, loadingItems, addItem, removeItem } = useInventory();
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
+  const { loading, inventory, addItem, removeItem } = useInventory();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -25,13 +26,13 @@ export default function Home() {
     setItemName("");
   };
 
-  const handleAddItem = async (item) => {
-    await addItem(item);
+  const handleAddItem = async (itemName) => {
+    addItem(itemName);
     handleClose(); // Close the modal after adding an item
   };
 
-  const handleRemoveItem = async (item) => {
-    await removeItem(item);
+  const handleRemoveItem = async (itemName) => {
+    removeItem(itemName)
     handleClose(); // Close the modal after removing an item
   };
 
@@ -74,7 +75,6 @@ export default function Home() {
                 variant="contained"
                 color="primary"
                 onClick={() => handleAddItem(itemName)}
-                disabled={loadingItems[itemName]}
               >
                 Add
               </Button>
@@ -82,7 +82,6 @@ export default function Home() {
                 variant="contained"
                 color="secondary"
                 onClick={() => handleRemoveItem(itemName)}
-                disabled={loadingItems[itemName]}
               >
                 Remove
               </Button>
@@ -93,6 +92,11 @@ export default function Home() {
       <Button variant="contained" color="primary" onClick={handleOpen}>
         Add New Item
       </Button>
+      <Link href="./camera">
+        <IconButton style={{ fontSize: "24px" }}>
+          <CameraEnhanceIcon />
+        </IconButton>
+      </Link>
       <Box border="1px solid #333" marginTop={2}>
         <Box
           width="800px"
@@ -108,10 +112,10 @@ export default function Home() {
         </Box>
       </Box>
       <Cards
+        loading={loading}
         inventory={inventory}
-        loadingItems={loadingItems}
-        addItem={addItem}
-        removeItem={removeItem}
+        handleAddItem={handleAddItem}
+        handleRemoveItem={handleRemoveItem}
       />
     </Box>
   );
