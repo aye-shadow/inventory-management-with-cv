@@ -18,7 +18,7 @@ import Link from "next/link";
 export default function Home() {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
-  const { loading, inventory, addItem, removeItem } = useInventory();
+  const { loading, inventory, loadingItem, addItem, removeItem } = useInventory();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -114,6 +114,7 @@ export default function Home() {
       <Cards
         loading={loading}
         inventory={inventory}
+        loadingItem={loadingItem}
         handleAddItem={handleAddItem}
         handleRemoveItem={handleRemoveItem}
       />

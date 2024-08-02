@@ -13,10 +13,13 @@ import {
 
 const useInventory = () => {
   const [inventory, setInventory] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingItem, setLoadingItem] = useState("");
 
   useEffect(() => {
     const loadInitialInventory = async () => {
+      setLoading(true);
+
       const snapshot = query(collection(firestore, "inventory"));
       const docs = await getDocs(snapshot);
       const inventoryList = [];
@@ -27,15 +30,17 @@ const useInventory = () => {
         });
       });
       setInventory(inventoryList);
+
+      setLoading(false);
     };
 
-    setLoading(true);
     loadInitialInventory();
-    setLoading(false);
   }, []);
 
   const addItem = async (itemName) => {
-    const item = inventory.find(({ name }) => name === itemName)
+    const item = inventory.find(({ name }) => name === itemName);
+    setLoadingItem(itemName);
+
     if (item) {
       const docRef = doc(collection(firestore, "inventory"), itemName);
       await setDoc(docRef, { quantity: item.quantity + 1 });
@@ -57,10 +62,14 @@ const useInventory = () => {
         { name: itemName, quantity: 1 },
       ]);
     }
+
+    setLoadingItem("");
   };
 
   const removeItem = async (itemName) => {
     const item = inventory.find(({ name }) => name === itemName);
+    setLoadingItem(itemName);
+
     if (item) {
       const docRef = doc(collection(firestore, "inventory"), itemName);
       if (item.quantity === 1) {
@@ -83,9 +92,11 @@ const useInventory = () => {
         );
       }
     }
+
+    setLoadingItem("");
   };
 
-  return { inventory, loading, addItem, removeItem };
+  return { inventory, loading, loadingItem, addItem, removeItem };
 };
 
 export default useInventory;

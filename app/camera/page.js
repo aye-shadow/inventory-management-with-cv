@@ -2,6 +2,7 @@ import React from "react";
 import OpenAI from "openai";
 
 const CameraComponent = async () => {
+  let message;
   try {
     const apiKey = process.env.OPENAI_VISION_AI_API_KEY;
     if (!apiKey) {
@@ -19,12 +20,12 @@ const CameraComponent = async () => {
         },
       ],
     });
-    console.log(response.choices[0].message['content']);
+    message = response.choices[0].message["content"];
   } catch (error) {
     console.error("Error fetching OpenAI response:", error);
   }
 
-  return <div>hi</div>;
+  return <div>{message}</div>;
 };
 
 export default CameraComponent;

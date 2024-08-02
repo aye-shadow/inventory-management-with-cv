@@ -1,11 +1,11 @@
 // components/cards.js
 "use client";
 import { Box, Typography, Stack, Button, Skeleton } from "@mui/material";
-import useInventory from "@/hooks/useInventory";
 
 export default function Cards({
   loading,
   inventory,
+  loadingItem,
   handleAddItem,
   handleRemoveItem,
 }) {
@@ -53,6 +53,7 @@ export default function Cards({
                   variant="contained"
                   color="primary"
                   onClick={() => handleAddItem(name)}
+                  disabled={loadingItem === name}
                 >
                   Add
                 </Button>
@@ -60,6 +61,7 @@ export default function Cards({
                   variant="contained"
                   color="error"
                   onClick={() => handleRemoveItem(name)}
+                  disabled={loadingItem === name}
                 >
                   Remove
                 </Button>
