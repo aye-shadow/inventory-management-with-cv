@@ -10,7 +10,7 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-import useInventory from "@/hooks/useInventory";
+import useInventory from "@/app/hooks/useInventory";
 import Cards from "./components/cards";
 import { CameraEnhance as CameraEnhanceIcon } from "@mui/icons-material";
 import Link from "next/link";
