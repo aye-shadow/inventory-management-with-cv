@@ -1,6 +1,5 @@
-// pages/Home.js
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Modal,
@@ -10,15 +9,16 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-import useInventory from "@/app/hooks/useInventory";
 import Cards from "./components/cards";
 import { CameraEnhance as CameraEnhanceIcon } from "@mui/icons-material";
 import Link from "next/link";
+import { useInventoryContext } from "./context/inventoryProvider";
 
 export default function Home() {
+  const { inventory, updateInventory } = useInventoryContext();
+
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
-  const { loading, inventory, loadingItem, addItem, removeItem } = useInventory();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -26,14 +26,23 @@ export default function Home() {
     setItemName("");
   };
 
-  const handleAddItem = async (itemName) => {
-    addItem(itemName);
+  const handleUpdateItem = async (itemName, newQuantity) => {
+    const itemIndex = inventory.findIndex((item) => item.name === itemName);
+    if (itemIndex == -1) {
+      // item does not exist, so add it
+      updateInventory(itemName, 1);
+    } else {
+      // item exists
+      if (newQuantity === -1) {
+        // decrement quantity
+        updateInventory(itemName, inventory[itemIndex].quantity - 1);
+      }
+      else {
+        // increment quantity
+        updateInventory(itemName, inventory[itemIndex].quantity + 1);
+      }
+    }
     handleClose(); // Close the modal after adding an item
-  };
-
-  const handleRemoveItem = async (itemName) => {
-    removeItem(itemName)
-    handleClose(); // Close the modal after removing an item
   };
 
   return (
@@ -74,14 +83,14 @@ export default function Home() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => handleAddItem(itemName)}
+                onClick={() => handleUpdateItem(itemName, 1)}
               >
                 Add
               </Button>
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => handleRemoveItem(itemName)}
+                onClick={() => handleUpdateItem(itemName, -1)}
               >
                 Remove
               </Button>
@@ -112,11 +121,11 @@ export default function Home() {
         </Box>
       </Box>
       <Cards
-        loading={loading}
-        inventory={inventory}
-        loadingItem={loadingItem}
-        handleAddItem={handleAddItem}
-        handleRemoveItem={handleRemoveItem}
+      // loading={loading}
+      // inventory={inventory}
+      // loadingItem={loadingItem}
+      // handleAddItem={handleAddItem}
+      // handleRemoveItem={handleRemoveItem}
       />
     </Box>
   );

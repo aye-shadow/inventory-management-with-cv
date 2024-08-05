@@ -1,14 +1,29 @@
-// components/cards.js
 "use client";
 import { Box, Typography, Stack, Button, Skeleton } from "@mui/material";
+import { useState } from "react";
+import { useInventoryContext } from "../context/inventoryProvider";
+import axios from "axios";
 
-export default function Cards({
-  loading,
-  inventory,
-  loadingItem,
-  handleAddItem,
-  handleRemoveItem,
-}) {
+export default function Cards() {
+  const { inventory, loading, updateInventory } = useInventoryContext();
+  const [loadingItemNames, setLoadingItemNames] = useState([]);
+
+  async function updateItemInInventory(iName, quantity) {
+    setLoadingItemNames((prevItems) => [...prevItems, iName]);
+  
+    var payload = { itemName: iName, exists: true, newQuantity: quantity };
+    try {
+      await axios.post("/api/firebase/updateItem", payload);
+      updateInventory(iName, quantity);
+    } catch (error) {
+      console.error("Error updating item:", error);
+    } finally {
+      setLoadingItemNames((prevItems) =>
+        prevItems.filter((item) => item !== iName)
+      );
+    }
+  }  
+
   return (
     <Stack width="800px" height="300px" spacing={2} overflow="auto">
       {loading ? (
@@ -52,18 +67,18 @@ export default function Cards({
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => handleAddItem(name)}
-                  disabled={loadingItem === name}
+                  onClick={() => updateItemInInventory(name, quantity + 1)}
+                  disabled={loadingItemNames.includes(name)}
                 >
-                  Add
+                  +
                 </Button>
                 <Button
                   variant="contained"
                   color="error"
-                  onClick={() => handleRemoveItem(name)}
-                  disabled={loadingItem === name}
+                  onClick={() => updateItemInInventory(name, quantity - 1)}
+                  disabled={loadingItemNames.includes(name)}
                 >
-                  Remove
+                  -
                 </Button>
               </Stack>
             </Box>

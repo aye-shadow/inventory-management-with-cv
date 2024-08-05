@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
+
 export async function POST(request) {
   const body = await request.json();
   //   console.log("body:", body.photoURL);

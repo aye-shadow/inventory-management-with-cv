@@ -1,9 +1,8 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { Camera } from "react-camera-pro";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
 import { storage } from "../../firebase.js";
-import OpenAI from "openai";
 import axios from "axios";
 
 export default function CameraComponent() {
@@ -29,36 +28,18 @@ export default function CameraComponent() {
   }
 
   async function uploadStorage() {
-    // Extract the base64 data from the photo string
     const base64Data = photo.split(",")[1];
 
-    // Convert the base64 string to a binary string
-    const byteCharacters = atob(base64Data);
-
-    // Convert the binary string to an array of bytes
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-
-    // Convert the array of bytes to a Blob
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "image/jpeg" });
-
-    // Generate a unique filename
     const filename = `images/photo_${Date.now()}.jpeg`;
-
-    // Create a reference to the file in Firebase Storage
     const storageRef = ref(storage, filename);
 
-    // Upload the Blob to Firebase Storage
-    await uploadBytes(storageRef, blob);
+    await uploadString(storageRef, base64Data, "base64", {
+      contentType: "image/jpeg",
+    });
 
-    // Get the download URL
     const downloadUrl = await getDownloadURL(storageRef);
 
-    // Update the state with the download URL
-    setPhoto(downloadUrl);
+    setPhoto(downloadUrl); // Set the photo state to the download URL instead of the filename
     classifyImage();
   }
 
