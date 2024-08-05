@@ -1,4 +1,4 @@
-import { firestore } from "@/firebase";
+import { firestore } from "../../../../firebase.js";
 import { collection, setDoc, doc, deleteDoc } from "firebase/firestore";
 import { NextResponse } from "next/server";
 

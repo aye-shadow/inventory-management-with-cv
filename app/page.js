@@ -26,19 +26,34 @@ export default function Home() {
     setItemName("");
   };
 
-  const handleUpdateItem = async (itemName, newQuantity) => {
+  const handleUpdateItem = async (itemName, nQuantity) => {
     const itemIndex = inventory.findIndex((item) => item.name === itemName);
-    if (itemIndex == -1) {
-      // item does not exist, so add it
-      updateInventory(itemName, 1);
-    } else {
-      // item exists
-      if (newQuantity === -1) {
-        // decrement quantity
-        updateInventory(itemName, inventory[itemIndex].quantity - 1);
+
+    if (itemIndex == -1 && nQuantity != 0) {
+      let addAmount, existingItem;
+
+      if (itemIndex == -1) {
+        // item does not exist, so add it
+        addAmount = 1;
+        existingItem = false;
       } else {
-        // increment quantity
-        updateInventory(itemName, inventory[itemIndex].quantity + 1);
+        // item exists
+        existingItem = true;
+        if (nQuantity === -1) {
+          // decrement quantity
+          addAmount = inventory[itemIndex].quantity - 1;
+        } else {
+          // increment quantity
+          addAmount = inventory[itemIndex].quantity + 1;
+        }
+
+        var payload = {
+          itemName: iName,
+          exists: existingItem,
+          newQuantity: addAmount,
+        };
+        await axios.post("/api/firebase/updateItem", payload);
+        updateInventory(itemName, addAmount);
       }
     }
     handleClose(); // Close the modal after adding an item
