@@ -36,8 +36,7 @@ export default function Home() {
       if (newQuantity === -1) {
         // decrement quantity
         updateInventory(itemName, inventory[itemIndex].quantity - 1);
-      }
-      else {
+      } else {
         // increment quantity
         updateInventory(itemName, inventory[itemIndex].quantity + 1);
       }
@@ -120,13 +119,7 @@ export default function Home() {
           </Typography>
         </Box>
       </Box>
-      <Cards
-      // loading={loading}
-      // inventory={inventory}
-      // loadingItem={loadingItem}
-      // handleAddItem={handleAddItem}
-      // handleRemoveItem={handleRemoveItem}
-      />
+      <Cards />
     </Box>
   );
 }
